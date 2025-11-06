@@ -1,13 +1,18 @@
+-- DDL CORRIGIDO COM ESTOQUE INCLUÍDO NO DROP TABLE INICIAL
+
+-- A CLÁUSULA DROP TABLE IF EXISTS GARANTE QUE TODAS AS TABELAS SEJAM REMOVIDAS
+-- ANTES DE SEREM RE-CRIADAS, EVITANDO O ERRO [42P07].
+DROP TABLE IF EXISTS SUPORTE_CHAMADO, COMISSAO_DENTISTA, PAGAMENTO, CONTAS_PAGAR, CONTAS_RECEBER, CANC_REAGENDAMENTO, EVOLUCAO, ATENDIMENTO, AGENDA_DENTISTA, ITEM_PLANO, PLANO_TRATAMENTO, ODONTOGRAMA, ANAMNESE, PROCEDIMENTO, DENTISTA, PACIENTE, USUARIO, ESTOQUE CASCADE;
+
 
 -- MÓDULO I: CADASTRO BÁSICO E USUÁRIOS
 
-
--- Tabela de Usuários (Base para login e permissões)
+-- Tabela de Usuários
 CREATE TABLE USUARIO (
     ID_Usuario SERIAL PRIMARY KEY,
     Email VARCHAR(100) UNIQUE NOT NULL,
     Senha VARCHAR(255) NOT NULL,
-    Tipo VARCHAR(20) NOT NULL CHECK (Tipo IN ('Dentista', 'Recepcionista', 'Admin', 'Paciente')),
+    Tipo VARCHAR(20) NOT NULL CHECK (Tipo IN ('Dentista', 'Recepcionista', 'Administrativo', 'Cliente')), 
     Data_Cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -39,15 +44,14 @@ CREATE TABLE PROCEDIMENTO (
     ID_Procedimento SERIAL PRIMARY KEY,
     Nome_Procedimento VARCHAR(100) NOT NULL,
     Descricao TEXT,
-    Valor_Particular NUMERIC(10, 2) NOT NULL, -- Uso NUMERIC em vez de DECIMAL para PostgreSQL
+    Valor_Particular NUMERIC(10, 2) NOT NULL,
     Codigo_TUSS VARCHAR(20)
 );
 
 
 -- MÓDULO II: CLÍNICO (PRONTUÁRIO)
 
-
--- Tabela de Anamnese (Histórico de Saúde do Paciente)
+-- Tabela de Anamnese
 CREATE TABLE ANAMNESE (
     ID_Anamnese SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
@@ -58,18 +62,18 @@ CREATE TABLE ANAMNESE (
     FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente)
 );
 
--- Tabela de Odontograma (Situação dos Dentes)
+-- Tabela de Odontograma
 CREATE TABLE ODONTOGRAMA (
     ID_Odontograma SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
-    Dente_Numero VARCHAR(5) NOT NULL, -- Ex: 11, 35, 84 (Decíduo)
-    Face_Dente VARCHAR(20), -- Ex: Oclusal, Mesial, Distal
+    Dente_Numero VARCHAR(5) NOT NULL,
+    Face_Dente VARCHAR(20),
     Status_Dente VARCHAR(50) NOT NULL CHECK (Status_Dente IN ('Hígido', 'Cárie', 'Restauração', 'Extraído', 'Ausente', 'Prótese')),
     Observacao TEXT,
     FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente)
 );
 
--- Tabela de Plano de Tratamento (Orçamento e Planejamento)
+-- Tabela de Plano de Tratamento
 CREATE TABLE PLANO_TRATAMENTO (
     ID_Plano SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
@@ -81,7 +85,7 @@ CREATE TABLE PLANO_TRATAMENTO (
     FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
 );
 
--- Tabela de Itens do Plano (Procedimentos que compõem o plano)
+-- Tabela de Itens do Plano
 CREATE TABLE ITEM_PLANO (
     ID_Item SERIAL PRIMARY KEY,
     ID_Plano INT NOT NULL,
@@ -94,11 +98,11 @@ CREATE TABLE ITEM_PLANO (
     FOREIGN KEY (ID_Procedimento) REFERENCES PROCEDIMENTO(ID_Procedimento)
 );
 
--- Tabela de Evolução (Registro de cada procedimento realizado na consulta)
+-- Tabela de Evolução
 CREATE TABLE EVOLUCAO (
     ID_Evolucao SERIAL PRIMARY KEY,
     ID_Plano INT,
-    ID_Atendimento INT NOT NULL, -- Será referenciado abaixo
+    ID_Atendimento INT NOT NULL,
     Data_Evolucao TIMESTAMP NOT NULL,
     Descricao_Evolucao TEXT NOT NULL,
     Procedimento_Realizado VARCHAR(100),
@@ -106,11 +110,9 @@ CREATE TABLE EVOLUCAO (
 );
 
 
-
 -- MÓDULO III: AGENDAMENTO
 
-
--- Tabela de Agenda (Disponibilidade dos Dentistas)
+-- Tabela de Agenda
 CREATE TABLE AGENDA_DENTISTA (
     ID_Agenda SERIAL PRIMARY KEY,
     ID_Dentista INT NOT NULL,
@@ -122,18 +124,16 @@ CREATE TABLE AGENDA_DENTISTA (
     FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
 );
 
--- Tabela de Atendimentos (Consultas Agendadas)
+-- Tabela de Atendimentos
 CREATE TABLE ATENDIMENTO (
     ID_Atendimento SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
     ID_Dentista INT NOT NULL,
     Data_Hora_Inicio TIMESTAMP NOT NULL,
     Duracao_Minutos INT,
-    ID_Item_Plano INT,
     Status VARCHAR(20) NOT NULL CHECK (Status IN ('Agendado', 'Confirmado', 'Realizado', 'Cancelado', 'Reagendado', 'Faltou')),
     FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente),
-    FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista),
-    FOREIGN KEY (ID_Item_Plano) REFERENCES ITEM_PLANO(ID_Item)
+    FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
 );
 
 -- Atualiza a chave estrangeira na tabela EVOLUCAO
@@ -154,11 +154,9 @@ CREATE TABLE CANC_REAGENDAMENTO (
 );
 
 
-
 -- MÓDULO IV: GESTÃO E FINANCEIRO
 
-
--- Tabela de Contas a Receber (Receitas de Planos de Tratamento/Consultas)
+-- Tabela de Contas a Receber
 CREATE TABLE CONTAS_RECEBER (
     ID_Receber SERIAL PRIMARY KEY,
     ID_Plano INT NOT NULL,
@@ -170,7 +168,7 @@ CREATE TABLE CONTAS_RECEBER (
     FOREIGN KEY (ID_Plano) REFERENCES PLANO_TRATAMENTO(ID_Plano)
 );
 
--- Tabela de Contas a Pagar (Despesas)
+-- Tabela de Contas a Pagar
 CREATE TABLE CONTAS_PAGAR (
     ID_Pagar SERIAL PRIMARY KEY,
     Descricao VARCHAR(100) NOT NULL,
@@ -181,7 +179,7 @@ CREATE TABLE CONTAS_PAGAR (
     Status VARCHAR(20) NOT NULL CHECK (Status IN ('Pendente', 'Pago', 'Atrasado'))
 );
 
--- Tabela de Pagamento de Clientes (Registro de cada transação de pagamento)
+-- Tabela de Pagamento de Clientes
 CREATE TABLE PAGAMENTO (
     ID_Pagamento SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
@@ -193,7 +191,7 @@ CREATE TABLE PAGAMENTO (
     FOREIGN KEY (ID_Conta_Receber) REFERENCES CONTAS_RECEBER(ID_Receber)
 );
 
--- Tabela de Comissões de Dentistas (Cálculo de repasse)
+-- Tabela de Comissões de Dentistas
 CREATE TABLE COMISSAO_DENTISTA (
     ID_Comissao SERIAL PRIMARY KEY,
     ID_Pagamento INT NOT NULL,
@@ -205,7 +203,7 @@ CREATE TABLE COMISSAO_DENTISTA (
     FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
 );
 
--- Tabela de Estoque (Administrativo)
+-- Tabela de Estoque
 CREATE TABLE ESTOQUE (
     ID_Material SERIAL PRIMARY KEY,
     Nome_Material VARCHAR(100) NOT NULL,
