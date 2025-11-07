@@ -4,7 +4,8 @@ Projeto de desenvolvimento de um sistema de agendamentos e pagamentos de consult
 
 # ER Diagrama do banco de dados
 
-<img width="860" height="803" alt="image" src="https://github.com/user-attachments/assets/faa9c5db-31e8-40ed-8b55-3116d030ad8a" />
+<img width="1388" height="1320" alt="ER_BancoAtualizado" src="https://github.com/user-attachments/assets/9f45fbe5-809d-45f2-b92f-30a7c3d6d418" />
+
 
 # Diagrama de atividades
 
