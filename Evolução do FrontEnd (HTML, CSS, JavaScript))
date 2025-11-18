@@ -11,7 +11,7 @@
     .container { max-width:1200px; margin:20px auto; padding:0 20px; }
     .card { 
         background:white; 
-        padding:20px; 
+        padding:20px;
         margin:10px; 
         border-radius:8px; 
         box-shadow:0 2px 5px rgba(0,0,0,0.1); 
@@ -56,15 +56,9 @@
 <div class="container hidden" id="cadastro">
     <h2 class="section-title">Novo Cadastro</h2>
     <p>Crie sua conta. Para perfis **Dentista** ou **Administrativo**, o cadastro estará pendente de aprovação.</p>
-
     <input type="text" placeholder="Nome Completo" id="regName">
     <input type="email" placeholder="Email" id="regEmail">
     <input type="password" placeholder="Senha" id="regPass">
-    <select id="regRole">
-        <option value="Cliente">Cliente / Paciente</option>
-        <option value="Dentista">Dentista</option>
-        <option value="Administrativo">Administrativo</option>
-    </select>
     <button onclick="registerUser()">Cadastrar</button>
     <button onclick="showScreen('loginScreen')" style="background:#ccc; color:#333;">Voltar ao Login</button>
 </div>
@@ -72,7 +66,8 @@
 <div class="container hidden" id="dashboard">
     <h2>Dashboard</h2>
     <div class="grid">
-        </div>
+    
+    </div>
 </div>
 
 <div class="container hidden" id="agendamento">
@@ -81,15 +76,58 @@
     <h3>Próximos Atendimentos Agendados</h3>
     <table>
         <thead>
-            <tr><th>Data/Hora Início</th><th>Paciente</th><th>Dentista</th><th>Status</th><th>Duração (min)</th></tr>
+            <tr><th>Data/Hora Início</th><th>Paciente</th><th>Dentista</th><th>Status</th><th>Duração (min)</th><th>Ação</th></tr>
         </thead>
         <tbody>
-            <tr><td>2025-11-01 09:00</td><td>João Silva</td> <td>Dra. Ana Costa</td> <td>Confirmado</td> <td>60</td> </tr>
-            <tr><td>2025-11-01 10:30</td><td>Maria Souza</td><td>Dr. Pedro Alves</td><td>Agendado</td><td>45</td></tr>
+            <tr><td>2025-11-01 09:00</td><td>João Silva</td> <td>Dra. Ana Costa</td> <td>Confirmado</td> <td>60</td> 
+                <td><button>Remarcar</button><button style="background:red; margin-left:5px;">Cancelar</button></td> 
+            </tr>
+            <tr><td>2025-11-01 10:30</td><td>Maria Souza</td><td>Dr. Pedro Alves</td> <td>Agendado</td><td>45</td>
+                <td><button>Remarcar</button><button style="background:red; margin-left:5px;">Cancelar</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <button>+ Novo Agendamento</button>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="historico">
+    <h2 class="section-title">Meu Histórico de Atendimentos</h2>
+    <p>Histórico completo de agendamentos, procedimentos e pagamentos.</p>
+    
+    <h3>Histórico de Agendamentos</h3>
+    <table>
+        <thead>
+            <tr><th>Data/Hora</th><th>Dentista</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>2025-08-15 14:00</td><td>Dr. Pedro Alves</td><td>**Compareceu**</td></tr>
+            <tr><td>2025-07-01 10:00</td><td>Dra. Ana Costa</td><td>Cancelou</td></tr>
+            <tr><td>2025-06-05 16:30</td><td>Dra. Ana Costa</td><td>**Faltou**</td></tr>
+            <tr><td>2025-05-10 11:00</td><td>Dr. Pedro Alves</td><td>Remarcou (para 2025-05-15)</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Histórico de Pagamentos</h3>
+    <table>
+        <thead><tr><th>Data Pagamento</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody>
+            <tr><td>2025-10-25</td><td>Plano de Tratamento (Parcela 1/5)</td><td>R$250,00</td><td>Pago</td></tr>
+            <tr><td>2025-09-25</td><td>Plano de Tratamento (Entrada)</td><td>R$500,00</td><td>Pago</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Histórico de Procedimentos</h3>
+    <table>
+        <thead><tr><th>Data</th><th>Dentista</th><th>Procedimento</th><th>Dente/Local</th></tr></thead>
+        <tbody>
+            <tr><td>2025-10-25</td><td>Dra. Ana Costa</td><td>Restauração em Resina</td><td>36 - Oclusal</td></tr>
+            <tr><td>2025-07-01</td><td>Dra. Ana Costa</td><td>Exodontia Simples</td><td>18</td></tr>
         </tbody>
     </table>
     <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
 </div>
+
 
 <div class="container hidden" id="pacientes">
     <h2 class="section-title">Cadastro de Pacientes</h2>
@@ -100,10 +138,9 @@
             <tr><th>ID</th><th>Nome</th><th>CPF</th><th>Telefone</th><th>Ação</th></tr>
         </thead>
         <tbody>
-            <tr><td>1</td><td>João Silva</td><td>123.456.789-00</td><td>(11) 98765-4321</td><td><button onclick="showScreen('prontuario')">Ver Prontuário</button></td></tr>
-            <tr><td>2</td><td>Maria Souza</td><td>000.111.222-33</td><td>(21) 91234-5678</td><td><button onclick="showScreen('prontuario')">Ver Prontuário</button></td></tr>
-        </tbody>
+            <tr><td>1</td><td>João Silva</td><td>123.456.789-00</td><td>(11) 98765-4321</td><td><button onclick="showScreen('prontuario')">Ver Prontuário</button><button style="margin-left:5px;">Alterar Dados</button></td></tr> <tr><td>2</td><td>Maria Souza</td><td>000.111.222-33</td><td>(21) 91234-5678</td><td><button onclick="showScreen('prontuario')">Ver Prontuário</button><button style="margin-left:5px;">Alterar Dados</button></td></tr> </tbody>
     </table>
+   
     <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
 </div>
 
@@ -113,8 +150,10 @@
     <h3>Anamnese</h3><p>Histórico Médico: Hipertenso, usa Losartana.</p><p>Alergias: Penicilina.</p>
     <h3>Plano de Tratamento</h3>
     <table>
-        <thead><tr><th>Data</th><th>Dentista</th><th>Status</th><th>Valor Proposto</th></tr></thead>
-        <tbody><tr><td>2025-10-20</td><td>Dra. Ana Costa</td><td>Em Andamento</td><td>R$ 1.250,00</td></tr></tbody>
+        <thead><tr><th>Data</th><th>Dentista</th><th>Status</th><th>Valor Proposto</th><th>Ação</th></tr></thead>
+        <tbody><tr><td>2025-10-20</td><td>Dra. Ana Costa</td> <td>Em Andamento</td><td>R$ 1.250,00</td>
+            <td><button>+ Add Procedimento</button></td>
+        </tr></tbody>
     </table>
     <h3>Evolução Clínica</h3>
     <ul>
@@ -126,7 +165,7 @@
 
 <div class="container hidden" id="financeiro">
     <h2 class="section-title">Financeiro</h2>
-    <p>Gestão de Receitas e Despesas. (Cliente: Mostra apenas Contas a Receber relacionadas a si)</p>
+    <p>Gestão de Receitas e Despesas.</p>
     <h3>Contas a Receber</h3>
     <table>
         <thead><tr><th>Vencimento</th><th>Paciente</th><th>Valor Parcela</th><th>Status</th></tr></thead>
@@ -139,6 +178,7 @@
     <table>
         <thead><tr><th>Vencimento</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead>
         <tbody>
+ 
             <tr><td>2025-11-05</td><td>Aluguel Consultório</td><td>R$2.500,00</td><td>Pendente</td></tr>
             <tr><td>2025-10-20</td><td>Compra de Luvas</td><td>R$150,00</td><td>Pago</td></tr>
         </tbody>
@@ -175,13 +215,15 @@
     <h2 class="section-title">Cadastro de Dentistas</h2>
     <table>
         <thead>
-            <tr><th>Nome</th><th>CRO</th><th>Especialidade</th></tr>
+            <tr><th>Nome</th><th>CRO</th><th>Especialidade</th><th>Ação</th></tr>
+    
         </thead>
         <tbody>
-            <tr><td>Dra. Ana Costa</td><td>CRO/SP 12345</td><td>Clínica Geral</td></tr>
-            <tr><td>Dr. Pedro Alves</td><td>CRO/RJ 67890</td><td>Ortodontia</td></tr>
+            <tr><td>Dra. Ana Costa</td> <td>CRO/SP 12345</td><td>Clínica Geral</td><td><button>Editar</button></td></tr>
+            <tr><td>Dr. Pedro Alves</td> <td>CRO/RJ 67890</td><td>Ortodontia</td><td><button>Editar</button></td></tr>
         </tbody>
     </table>
+    <button>+ Novo Dentista</button>
     <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
 </div>
 
@@ -189,11 +231,16 @@
     <h2 class="section-title">Gestão de Estoque</h2>
     <table>
         <thead>
-            <tr><th>Material</th><th>Quantidade Atual</th><th>Estoque Mínimo</th><th>Status</th></tr>
+            <tr><th>Material</th><th>Quantidade Atual</th><th>Estoque Mínimo</th><th>Status</th><th>Ação</th></tr>
         </thead>
         <tbody>
-            <tr><td>Luva de Procedimento</td><td>50 caixas</td><td>60</td><td style="color:red; font-weight:bold;">Abaixo do Mínimo!</td></tr>
-            <tr><td>Resina Z350</td><td>15 unidades</td><td>10</td><td style="color:green;">OK</td></tr>
+            <tr><td>Luva de Procedimento</td><td>50 caixas</td><td>60</td><td style="color:red; font-weight:bold;">Abaixo do Mínimo!</td>
+                <td><button>+ Add</button><button style="margin-left:5px;">- Remove</button></td>
+            </tr>
+        
+        <tr><td>Resina Z350</td><td>15 unidades</td><td>10</td><td style="color:green;">OK</td>
+            <td><button>+ Add</button><button style="margin-left:5px;">- Remove</button></td>
+        </tr>
         </tbody>
     </table>
     <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
@@ -201,13 +248,16 @@
 
 <div class="container hidden" id="suporte">
     <h2 class="section-title">Suporte e Chamados</h2>
+    <p>Use esta área para criar um novo chamado de suporte.</p>
+    <button>+ Abrir Novo Chamado</button> 
     <table>
         <thead>
             <tr><th>ID Chamado</th><th>Data Abertura</th><th>Prioridade</th><th>Descrição</th><th>Status</th></tr>
         </thead>
         <tbody>
             <tr><td>#001</td><td>2025-10-28 10:00</td><td>Alta</td><td>Erro ao salvar Plano de Tratamento.</td><td>Em Atendimento</td></tr>
-        </tbody>
+   
+         </tbody>
     </table>
     <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
 </div>
@@ -218,27 +268,31 @@
     // Mapeamento de telas para ícones e nomes
     const screenMap = {
         'agendamento': { icon: '🗓️', text: 'Agendamento' },
+        'historico': { icon: '🕰️', text: 'Meu Histórico' }, // Novo cartão para o histórico do cliente
         'pacientes': { icon: '🧑‍🦱', text: 'Pacientes' },
         'prontuario': { icon: '📋', text: 'Prontuário' },
         'financeiro': { icon: '💲', text: 'Financeiro' },
         'relatorios': { icon: '📊', text: 'Relatórios' },
+    
         'procedimentos': { icon: '💎', text: 'Procedimentos' },
         'dentistas': { icon: '👩‍⚕️', text: 'Dentistas' },
         'estoque': { icon: '📦', text: 'Estoque' },
-        'suporte': { icon: '🛠️', text: 'Suporte' }
+        'suporte': { icon: '🛠️', text: 'Suporte' } // Adicionar aba "suporte"
     };
 
-    // Definição das permissões de acesso por perfil
+    // Definição das permissões de acesso por perfil (corrigidas)
     const accessPermissions = {
+        // Administrativo: Acesso total
         'Administrativo': ['agendamento', 'pacientes', 'prontuario', 'financeiro', 'relatorios', 'procedimentos', 'dentistas', 'estoque', 'suporte'],
-        'Dentista': ['agendamento', 'pacientes', 'prontuario', 'financeiro', 'procedimentos', 'estoque'],
-        'Cliente': ['agendamento', 'prontuario', 'financeiro'] // Acesso próprio e restrito
+        // Dentista: remover financeiro, adicionar suporte, manter procedimentos
+        'Dentista': ['agendamento', 'pacientes', 'prontuario', 'procedimentos', 'estoque', 'suporte'], 
+        // Cliente: remover financeiro, adicionar historico e suporte
+        'Cliente': ['agendamento', 'historico', 'prontuario', 'suporte'] 
     };
 
     function login() {
         const user = document.getElementById('user').value.toLowerCase();
         const pass = document.getElementById('pass').value;
-
         // Simulação de autenticação simples e atribuição de perfil
         if (pass === '123') {
             if (user === 'admin@clinica.com') {
@@ -257,7 +311,7 @@
         }
 
         document.getElementById('loginScreen').classList.add('hidden');
-        renderDashboard(); 
+        renderDashboard();
     }
 
     function logout() {
@@ -280,11 +334,11 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('onclick', `showScreen('${screen}')`);
+              
                 card.innerHTML = `${info.icon} ${info.text}`;
                 dashboardGrid.appendChild(card);
             }
         });
-        
         // Adiciona botão de Sair
         const logoutCard = document.createElement('div');
         logoutCard.className = 'card';
@@ -301,11 +355,11 @@
         const name = document.getElementById('regName').value;
         const email = document.getElementById('regEmail').value;
         const pass = document.getElementById('regPass').value;
-        const role = document.getElementById('regRole').value;
+        // Padrão Cliente, conforme anotações
+        const role = 'Cliente'; 
 
         if (name && email && pass) {
             alert(`Cadastro de ${name} como ${role} enviado! Aguarde a aprovação da Clínica para Dentista/Administrativo. (Simulação)`);
-            
             // Limpar campos
             document.getElementById('regName').value = '';
             document.getElementById('regEmail').value = '';
@@ -318,13 +372,15 @@
     }
 
     function showScreen(screen) {
-        // Lista de todas as telas (adicionando 'cadastro')
+        // Lista de todas as telas (incluindo 'cadastro' e 'historico')
         const screens = [
             'dashboard',
             'loginScreen',
-            'cadastro', // Nova tela
+            'cadastro', 
             'agendamento',
+            'historico', // Nova tela
             'pacientes',
+ 
             'prontuario',
             'financeiro',
             'relatorios',
@@ -333,7 +389,6 @@
             'estoque',
             'suporte'
         ];
-        
         // Esconde todas as telas
         screens.forEach(s => {
             const element = document.getElementById(s);
@@ -341,7 +396,6 @@
                 element.classList.add('hidden');
             }
         });
-
         // Mostra a tela solicitada
         const targetElement = document.getElementById(screen);
         if (targetElement) {
