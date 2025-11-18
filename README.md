@@ -10,3 +10,8 @@ Projeto de desenvolvimento de um sistema de agendamentos e pagamentos de consult
 # Diagrama de atividades
 
 ![Diagrama de atividades](https://github.com/user-attachments/assets/5ab008b6-6ba1-4d2f-bda2-8f4397f006a0)
+
+
+# Diagrama Relacional
+
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/c9f19976-01a5-4a36-afd2-40f3951cefc7" />
