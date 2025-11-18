@@ -1,0 +1,339 @@
+// Usuario.java
+package com.clinica.model;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "USUARIO")
+public class Usuario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_Usuario")
+    private Long id;
+
+    @Column(name = "Email", nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(name = "Senha", nullable = false, length = 255)
+    private String senha;
+
+    @Column(name = "Tipo", nullable = false, length = 20)
+    private String tipo;
+
+    @Column(name = "Data_Cadastro")
+    private LocalDateTime dataCadastro;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Paciente> pacientes;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Dentista> dentistas;
+
+    // getters e setters
+}
+
+
+
+// Paciente.java
+package com.clinica.model;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "PACIENTE")
+public class Paciente {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_Paciente")
+    private Long id;
+
+    @Column(name = "Nome", nullable = false, length = 150)
+    private String nome;
+
+    @Column(name = "CPF", unique = true, length = 14)
+    private String cpf;
+
+    @Column(name = "Telefone", nullable = false, length = 15)
+    private String telefone;
+
+    @Column(name = "Endereco", length = 255)
+    private String endereco;
+
+    @Column(name = "Data_Nascimento")
+    private LocalDate dataNascimento;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_Usuario")
+    private Usuario usuario;
+
+    // getters e setters
+}
+
+// Dentista.java
+package com.clinica.model;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "DENTISTA")
+public class Dentista {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_Dentista")
+    private Long id;
+
+    @Column(name = "Nome", nullable = false, length = 150)
+    private String nome;
+
+    @Column(name = "CRO", nullable = false, unique = true, length = 20)
+    private String cro;
+
+    @Column(name = "Especialidade", length = 100)
+    private String especialidade;
+
+    @Column(name = "Telefone", length = 15)
+    private String telefone;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_Usuario")
+    private Usuario usuario;
+
+    // getters e setters
+}
+////////////////////////////////////////////////////////////////////////////////
+
+// Procedimento.java
+package com.clinica.model;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "PROCEDIMENTO")
+public class Procedimento {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_Procedimento")
+    private Long id;
+
+    @Column(name = "Nome_Procedimento", nullable = false, length = 100)
+    private String nomeProcedimento;
+
+    @Column(name = "Descricao")
+    private String descricao;
+
+    @Column(name = "Valor_Particular", nullable = false)
+    private BigDecimal valorParticular;
+
+    @Column(name = "Codigo_TUSS", length = 20)
+    private String codigoTuss;
+
+    // getters e setters
+}
+
+// PlanoTratamento.java
+package com.clinica.model;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+@Entity
+@Table(name = "PLANO_TRATAMENTO")
+public class PlanoTratamento {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_Plano")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_Paciente", nullable = false)
+    private Paciente paciente;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_Dentista", nullable = false)
+    private Dentista dentista;
+
+    @Column(name = "Data_Criacao", nullable = false)
+    private LocalDate dataCriacao;
+
+    @Column(name = "Valor_Total_Proposto")
+    private BigDecimal valorTotalProposto;
+
+    @Column(name = "Status", nullable = false, length = 20)
+    private String status;
+
+    @OneToMany(mappedBy = "planoTratamento")
+    private List<ItemPlano> itensPlano;
+
+    // getters e setters
+}
+
+
+// ItemPlano.java
+package com.clinica.model;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "ITEM_PLANO")
+public class ItemPlano {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_Item")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_Plano", nullable = false)
+    private PlanoTratamento planoTratamento;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_Procedimento", nullable = false)
+    private Procedimento procedimento;
+
+    @Column(name = "Dente_Numero", length = 5)
+    private String denteNumero;
+
+    @Column(name = "Face_Dente", length = 20)
+    private String faceDente;
+
+    @Column(name = "Valor_Cobrado", nullable = false)
+    private BigDecimal valorCobrado;
+
+    @Column(name = "Status_Execucao", nullable = false, length = 20)
+    private String statusExecucao;
+
+    // getters e setters
+}
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+package com.clinica.repository;
+
+import com.clinica.model.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {}
+
+@Repository
+public interface PacienteRepository extends JpaRepository<Paciente, Long> {}
+
+@Repository
+public interface DentistaRepository extends JpaRepository<Dentista, Long> {}
+
+@Repository
+public interface ProcedimentoRepository extends JpaRepository<Procedimento, Long> {}
+
+@Repository
+public interface PlanoTratamentoRepository extends JpaRepository<PlanoTratamento, Long> {}
+
+@Repository
+public interface ItemPlanoRepository extends JpaRepository<ItemPlano, Long> {}
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+package com.clinica.service;
+
+import com.clinica.model.Paciente;
+import com.clinica.repository.PacienteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class PacienteService {
+
+    @Autowired
+    private PacienteRepository repository;
+
+    public List<Paciente> findAll() {
+        return repository.findAll();
+    }
+
+    public Optional<Paciente> findById(Long id) {
+        return repository.findById(id);
+    }
+
+    public Paciente save(Paciente paciente) {
+        return repository.save(paciente);
+    }
+
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+package com.clinica.controller;
+
+import com.clinica.model.Paciente;
+import com.clinica.service.PacienteService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/pacientes")
+public class PacienteController {
+
+    @Autowired
+    private PacienteService service;
+
+    @GetMapping
+    public List<Paciente> findAll() {
+        return service.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Paciente> findById(@PathVariable Long id) {
+        return service.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public Paciente create(@RequestBody Paciente paciente) {
+        return service.save(paciente);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Paciente> update(@PathVariable Long id, @RequestBody Paciente paciente) {
+        if (!service.findById(id).isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        paciente.setId(id);
+        return ResponseEntity.ok(service.save(paciente));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/seubanco
+spring.datasource.username=seuusuario
+spring.datasource.password=suasenha
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+
