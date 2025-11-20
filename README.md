@@ -1,10 +1,12 @@
 # Prosperity
-Projeto de desenvolvimento de um sistema de agendamentos e pagamentos de consultados odontologicas.
+Um programa no qual você pode confiar, Criado e projetado para melhor lhe atender em suas demandas e gestões, trazendo facilidade para sua gestão.
+Preparado para estar atendendo e trazendo o melhor para sua Clinica Odontologica.
+Possibilitando melhor gestão e desenvolvimento.
 
 
-# ER Diagrama do banco de dados
+# ER Diagrama do banco de dados V4
 
-<img width="1388" height="1320" alt="ER_BancoAtualizado" src="https://github.com/user-attachments/assets/9f45fbe5-809d-45f2-b92f-30a7c3d6d418" />
+<img width="1431" height="1267" alt="ER_Prosperity_V4-1" src="https://github.com/user-attachments/assets/0a1a6b1a-5863-4470-8ef4-838f2517f827" />
 
 
 # Diagrama de atividades
