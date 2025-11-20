@@ -63,7 +63,7 @@ border-radius: 3px;}
     </div>
     <input type="email" 
  
-   placeholder="Email" id="user">
+    placeholder="Email" id="user">
     <input type="password" placeholder="Senha" id="pass">
     <button onclick="login()">Entrar</button>
     <button onclick="showScreen('cadastro')" style="background:#007bff; margin-left: 10px;">Novo Cadastro</button>
@@ -118,7 +118,6 @@ Pedro Alves</td> <td>Agendado</td><td>45</td>
     <h3>Histórico de Agendamentos</h3>
     <table>
         
-
     <thead>
             <tr><th>Data/Hora</th><th>Dentista</th><th>Status</th></tr>
         </thead>
@@ -146,7 +145,6 @@ Pedro Alves</td><td>Remarcou (para 2025-05-15)</td></tr>
     <h3>Histórico de Procedimentos</h3>
     <table>
      
-
         <thead><tr><th>Data</th><th>Dentista</th><th>Procedimento</th><th>Dente/Local</th></tr></thead>
         <tbody>
             <tr><td>2025-10-25</td><td>Dra.
@@ -167,12 +165,12 @@ Ana Costa</td><td>Exodontia Simples</td><td>18</td></tr>
             <tr><th>Email</th><td>joao@silva.com</td></tr>
             <tr><th>CPF</th><td>123.456.789-00</td></tr>
           
-  <tr><th>Telefone</th><td>(11) 98765-4321</td></tr>
+    <tr><th>Telefone</th><td>(11) 98765-4321</td></tr>
             <tr><th>Endereço</th><td>Rua das Flores, 100 - Centro</td></tr>
             <tr><th>Perfil de Acesso</th><td>Cliente</td></tr>
         </tbody>
     </table>
-    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+    <button onclick="alert('Funcionalidade: Abrir formulário para edição dos dados cadastrais.')">Alterar Dados</button> <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
 </div>
 
 
@@ -213,7 +211,7 @@ Ana Costa</td> <td>Em Andamento</td><td>R$ 1.250,00</td>
         </tr></tbody>
     </table>
    
- <h3>Evolução Clínica</h3>
+  <h3>Evolução Clínica</h3>
     <ul>
         <li>**2025-10-25:** Realizada Restauração no dente 36 - Oclusal.
 (ID_Atendimento: 1)</li>
@@ -241,7 +239,7 @@ Ana Costa</td> <td>Em Andamento</td><td>R$ 1.250,00</td>
         <tbody>
  
    
-         <tr><td>2025-11-05</td><td>Aluguel Consultório</td><td>R$2.500,00</td><td>Pendente</td></tr>
+          <tr><td>2025-11-05</td><td>Aluguel Consultório</td><td>R$2.500,00</td><td>Pendente</td></tr>
             <tr><td>2025-10-20</td><td>Compra de Luvas</td><td>R$150,00</td><td>Pago</td></tr>
         </tbody>
     </table>
@@ -276,7 +274,7 @@ Ana Costa</td> <td>Em Andamento</td><td>R$ 1.250,00</td>
         <tbody>
             <tr><td>Restauração em Resina</td><td>R$150,00</td><td>84100104</td></tr>
           
-  <tr><td>Exodontia Simples</td><td>R$200,00</td><td>84100015</td></tr>
+    <tr><td>Exodontia Simples</td><td>R$200,00</td><td>84100015</td></tr>
         </tbody>
     </table>
     <button id="addProcedimentoCadBtn" class="hide-for-client" onclick="alert('Funcionalidade: Abrir formulário de Novo Procedimento')">+ Novo Procedimento</button>
@@ -293,7 +291,7 @@ Ana Costa</td> <td>Em Andamento</td><td>R$ 1.250,00</td>
         </thead>
         <tbody>
        
-     <tr><td>Dra.
+      <tr><td>Dra.
     Ana Costa</td> <td>CRO/SP 12345</td><td>Clínica Geral</td><td><button>Editar</button><button id="remDentista1" class="hide-for-dentist hide-for-client" style="background:red; margin-left:5px;">Remover</button></td></tr>
             <tr><td>Dr.
 Pedro Alves</td> <td>CRO/RJ 67890</td><td>Ortodontia</td><td><button>Editar</button><button id="remDentista2" class="hide-for-dentist hide-for-client" style="background:red; margin-left:5px;">Remover</button></td></tr>
@@ -363,7 +361,7 @@ text: 'Pacientes' },
         'dentistas': { icon: '👩‍⚕️', text: 'Dentistas' },
         'estoque': { icon: '📦', text: 'Estoque' },
       
-  'suporte': { icon: '🛠️', text: 'Suporte' } // Adicionar aba "suporte"
+    'suporte': { icon: '🛠️', text: 'Suporte' } // Adicionar aba "suporte"
     };
 // Definição das permissões de acesso por perfil (corrigidas)
     const accessPermissions = {
@@ -373,7 +371,7 @@ text: 'Pacientes' },
         'Dentista': ['agendamento', 'pacientes', 'prontuario', 'procedimentos', 'estoque', 'suporte', 'meusDados'], 
         // Cliente: remover financeiro, adicionar historico e suporte + Meus Dados
  
-       'Cliente': ['agendamento', 'historico', 'prontuario', 
+        'Cliente': ['agendamento', 'historico', 'prontuario', 
     'suporte', 'meusDados'] 
     };
 function login() {
@@ -422,7 +420,6 @@ dashboardGrid.innerHTML = ''; // Limpa os cartões existentes
                 card.className = 'card';
                 card.setAttribute('onclick', `showScreen('${screen}')`);
               
-
     
                 card.innerHTML = `${info.icon} ${info.text}`;
                 dashboardGrid.appendChild(card);
@@ -515,7 +512,7 @@ document.getElementById('regPass').value = '';
 }
     }
     
-    // **NOVA FUNÇÃO**
+    // NOVO: Função consolidada para abrir chamado de suporte
     function openSuporteForm() {
         alert('Funcionalidade: Abrir formulário para detalhar o novo chamado.\nOpções de Suporte:\n1. Financeiro\n2. Atendimento\n3. Cadastro\n4. Outros');
     }
@@ -538,7 +535,7 @@ document.getElementById('regPass').value = '';
             'dentistas',
             'estoque',
  
-           'suporte'
+            'suporte'
            ];
 // Esconde todas as telas
         screens.forEach(s => {
