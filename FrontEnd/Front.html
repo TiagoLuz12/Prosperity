@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prosperity - Sistema de Gestão Odontológica</title>
+<style>
+    /* Estilos CSS - Mantidos e melhorados */
+    body { font-family: 'Poppins', sans-serif;
+margin:0; background:#f5f5f5; }
+    header { background:#5ab9a6; color:white; padding:15px 20px; text-align:center; }
+    .container { max-width:1200px;
+margin:20px auto; padding:0 20px; }
+    .card { 
+        background:white; 
+        padding:20px;
+margin:10px; 
+        border-radius:8px; 
+        box-shadow:0 2px 5px rgba(0,0,0,0.1); 
+        cursor:pointer; 
+        transition:0.3s; 
+    }
+    .card:hover { box-shadow:0 4px 10px rgba(0,0,0,0.2); transform: translateY(-2px);
+}
+    .hidden { display:none; }
+    .grid { display:flex; flex-wrap:wrap; gap:10px;
+}
+    .grid .card { flex:1 1 calc(20% - 20px); min-width: 180px; text-align: center;
+font-weight: 600;}
+    button { background:#5ab9a6; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; margin-top: 10px; transition: background-color 0.2s;
+}
+    button:hover { background:#489488; }
+    input, select { padding:10px; width:100%; margin:5px 0 15px; border-radius:5px;
+border:1px solid #ccc; box-sizing: border-box; }
+    h2, h3 { color:#333; }
+    table { width:100%;
+border-collapse:collapse; margin-top:15px; background:white; }
+    th, td { border:1px solid #ddd; padding:10px; text-align:left; font-size: 0.9em;
+}
+    th { background-color: #eaf7f5; color: #5ab9a6; }
+    .section-title { margin-top: 20px; padding-bottom: 5px;
+border-bottom: 2px solid #5ab9a6; }
+    .role-info { margin-bottom: 20px; padding: 10px; background: #eaf7f5; border-left: 5px solid #5ab9a6;
+border-radius: 3px;}
+    /* Estilos para ocultar botões de acordo com o perfil */
+    .hide-for-client, .hide-for-dentist { display: none !important;
+}
+</style>
+</head>
+<body>
+
+<header><h1>Prosperity - Protótipo V4</h1></header>
+
+<div class="container" id="loginScreen">
+    <h2>Login de Usuário</h2>
+    <div class="role-info">
+        <h4>Usuários para Teste (Senha: 123)</h4>
+        <ul>
+            <li>**Administrativo:** `admin@clinica.com` (Acesso Total)</li>
+            <li>**Dentista:** `dentista@clinica.com` (Acesso Limitado)</li>
+            <li>**Cliente:** `joao@silva.com` (Acesso Básico)</li>
+        </ul>
+    </div>
+    <input type="email" 
+ 
+   placeholder="Email" id="user">
+    <input type="password" placeholder="Senha" id="pass">
+    <button onclick="login()">Entrar</button>
+    <button onclick="showScreen('cadastro')" style="background:#007bff; margin-left: 10px;">Novo Cadastro</button>
+    <button onclick="openSuporteForm()" style="background:#489488; margin-top: 20px; width: 100%;">Abrir Chamado de Suporte</button> </div>
+
+<div class="container hidden" id="cadastro">
+    <h2 class="section-title">Novo Cadastro</h2>
+    <p>Crie sua conta.
+Para perfis **Dentista** ou **Administrativo**, o cadastro estará pendente de aprovação.</p>
+    <input type="text" placeholder="Nome Completo" id="regName">
+    <input type="email" placeholder="Email" id="regEmail">
+    <input type="password" placeholder="Senha" id="regPass">
+    <button onclick="registerUser()">Cadastrar</button>
+    <button onclick="showScreen('loginScreen')" style="background:#ccc; color:#333;">Voltar ao Login</button>
+    <button onclick="openSuporteForm()" style="background:#489488; margin-top: 20px; width: 100%;">Abrir Chamado de Suporte</button> </div>
+
+<div class="container hidden" id="dashboard">
+    <h2>Dashboard</h2>
+    <div class="grid">
+    
+    </div>
+</div>
+
+<div class="container hidden" id="agendamento">
+    <h2 class="section-title">Agendamento</h2>
+    <p>Simulação do Calendário de Atendimentos.
+(Cliente: Mostra apenas seus agendamentos)</p>
+    <h3>Próximos Atendimentos Agendados</h3>
+    <table>
+        <thead>
+            <tr><th>Data/Hora Início</th><th>Paciente</th><th>Dentista</th><th>Status</th><th>Duração (min)</th><th>Ação</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>2025-11-01 09:00</td><td>João Silva</td> <td>Dra.
+Ana Costa</td> <td>Confirmado</td> <td>60</td> 
+                <td><button>Remarcar</button><button style="background:red; margin-left:5px;">Cancelar</button></td> 
+            </tr>
+            <tr><td>2025-11-01 10:30</td><td>Maria Souza</td><td>Dr.
+Pedro Alves</td> <td>Agendado</td><td>45</td>
+                <td><button>Remarcar</button><button style="background:red; margin-left:5px;">Cancelar</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <button>+ Novo Agendamento</button>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="historico">
+    <h2 class="section-title">Meu Histórico de Atendimentos</h2>
+    <p>Histórico completo de agendamentos, procedimentos e pagamentos.</p>
+    
+    <h3>Histórico de Agendamentos</h3>
+    <table>
+        
+
+    <thead>
+            <tr><th>Data/Hora</th><th>Dentista</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>2025-08-15 14:00</td><td>Dr.
+Pedro Alves</td><td>**Compareceu**</td></tr>
+            <tr><td>2025-07-01 10:00</td><td>Dra.
+Ana Costa</td><td>Cancelou</td></tr>
+            <tr><td>2025-06-05 16:30</td><td>Dra.
+Ana Costa</td><td>**Faltou**</td></tr>
+            <tr><td>2025-05-10 11:00</td><td>Dr.
+Pedro Alves</td><td>Remarcou (para 2025-05-15)</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Histórico de Pagamentos</h3>
+    <table>
+        <thead><tr><th>Data Pagamento</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody>
+            <tr><td>2025-10-25</td><td>Plano de Tratamento (Parcela 1/5)</td><td>R$250,00</td><td>Pago</td></tr>
+            <tr><td>2025-09-25</td><td>Plano de Tratamento (Entrada)</td><td>R$500,00</td><td>Pago</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Histórico de Procedimentos</h3>
+    <table>
+     
+
+        <thead><tr><th>Data</th><th>Dentista</th><th>Procedimento</th><th>Dente/Local</th></tr></thead>
+        <tbody>
+            <tr><td>2025-10-25</td><td>Dra.
+Ana Costa</td><td>Restauração em Resina</td><td>36 - Oclusal</td></tr>
+            <tr><td>2025-07-01</td><td>Dra.
+Ana Costa</td><td>Exodontia Simples</td><td>18</td></tr>
+        </tbody>
+    </table>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="meusDados">
+    <h2 class="section-title">Meus Dados</h2>
+    <p>Informações de Cadastro (Disponível para todos).</p>
+    <table>
+        <tbody>
+            <tr><th>Nome Completo</th><td>João Silva (Exemplo)</td></tr>
+            <tr><th>Email</th><td>joao@silva.com</td></tr>
+            <tr><th>CPF</th><td>123.456.789-00</td></tr>
+          
+  <tr><th>Telefone</th><td>(11) 98765-4321</td></tr>
+            <tr><th>Endereço</th><td>Rua das Flores, 100 - Centro</td></tr>
+            <tr><th>Perfil de Acesso</th><td>Cliente</td></tr>
+        </tbody>
+    </table>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+
+<div class="container hidden" id="pacientes">
+    <h2 class="section-title">Cadastro de Pacientes</h2>
+    <p>Lista e busca de Pacientes.
+(Acesso apenas: Administrativo, Dentista)</p>
+    <input type="text" placeholder="Buscar por Nome ou CPF">
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Nome</th><th>CPF</th><th>Telefone</th><th>Ação</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>João Silva</td><td>123.456.789-00</td><td>(11) 98765-4321</td><td><button onclick="showScreen('prontuario')">Ver Prontuário</button><button style="margin-left:5px;">Alterar Dados</button></td></tr> <tr><td>2</td><td>Maria Souza</td><td>000.111.222-33</td><td>(21) 91234-5678</td><td><button onclick="showScreen('prontuario')">Ver Prontuário</button><button style="margin-left:5px;">Alterar Dados</button></td></tr> </tbody>
+    </table>
+   
+    <button id="addPacienteBtn" class="hide-for-client" onclick="alert('Funcionalidade: Abrir formulário de Novo Paciente')">+ Novo 
+Paciente</button>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="prontuario">
+    
+    <h2 class="section-title">Prontuário do Paciente (João Silva)</h2>
+    <p>Dados baseados em: PACIENTE, ANAMNESE, ODONTOGRAMA, PLANO_TRATAMENTO, EVOLUCAO.
+(Cliente: Visualização restrita)</p>
+    <h3>Anamnese</h3><p>Histórico Médico: Hipertenso, usa Losartana.</p><p>Alergias: Penicilina.</p>
+    <h3>Plano de Tratamento</h3>
+    <table>
+        <thead><tr><th>Data</th><th>Dentista</th><th>Status</th><th>Valor Proposto</th><th>Ação</th></tr></thead>
+        <tbody><tr><td>2025-10-20</td><td>Dra.
+Ana Costa</td> <td>Em Andamento</td><td>R$ 1.250,00</td>
+            <td id="prontuarioAddProcCell">
+                <button id="addProcedimentoBtn" class="hide-for-client">
+                    + Add Procedimento
+                </button>
+            </td>
+        </tr></tbody>
+    </table>
+   
+ <h3>Evolução Clínica</h3>
+    <ul>
+        <li>**2025-10-25:** Realizada Restauração no dente 36 - Oclusal.
+(ID_Atendimento: 1)</li>
+        <li>**2025-10-20:** Moldagem inicial para Prótese.</li>
+    </ul>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="financeiro">
+    <h2 class="section-title">Financeiro</h2>
+    <p>Gestão de Receitas e Despesas.
+(Acesso: Administrativo)</p>
+    <h3>Contas a Receber</h3>
+    <table>
+        <thead><tr><th>Vencimento</th><th>Paciente</th><th>Valor Parcela</th><th>Status</th></tr></thead>
+        <tbody>
+            <tr><td>2025-10-31</td><td>Ana Paula</td><td>R$300,00</td><td>Pendente</td></tr>
+            <tr><td>2025-10-25</td><td>João Silva</td><td>R$250,00</td><td>Pago</td></tr>
+       
+     </tbody>
+    </table>
+    <h3>Contas a Pagar</h3>
+    <table>
+        <thead><tr><th>Vencimento</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody>
+ 
+   
+         <tr><td>2025-11-05</td><td>Aluguel Consultório</td><td>R$2.500,00</td><td>Pendente</td></tr>
+            <tr><td>2025-10-20</td><td>Compra de Luvas</td><td>R$150,00</td><td>Pago</td></tr>
+        </tbody>
+    </table>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="relatorios">
+    <h2 class="section-title">Relatórios</h2>
+    <p>Exemplos de Relatórios que o sistema pode gerar com as 
+    tabelas.
+(Acesso: Administrativo)</p>
+    <ul>
+        <li>**Produtividade:** Ranking de dentistas por atendimentos e procedimentos realizados.</li>
+        <li>**Inadimplência:** Lista de pacientes com parcelas em status 'Atrasado'.</li>
+        <li>**Comissões:** Cálculo de repasse a ser feito aos dentistas.</li>
+        <li class="section-title" style="border:none; margin-top:10px;">Opções de Relatórios (Anotação)</li>
+        <li>**Financeiro:** Relatórios detalhados de receitas e despesas.</li>
+        <li>**Atendimentos:** Relatórios por tipo de serviço e dentista.</li>
+    
+    <li>**Ocorrências:** Relatórios de faltas e cancelamentos.</li>
+    </ul>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="procedimentos">
+    <h2 class="section-title">Cadastro de Procedimentos</h2>
+    <table>
+        <thead>
+            <tr><th>Nome</th><th>Valor 
+    Particular</th><th>Código TUSS</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Restauração em Resina</td><td>R$150,00</td><td>84100104</td></tr>
+          
+  <tr><td>Exodontia Simples</td><td>R$200,00</td><td>84100015</td></tr>
+        </tbody>
+    </table>
+    <button id="addProcedimentoCadBtn" class="hide-for-client" onclick="alert('Funcionalidade: Abrir formulário de Novo Procedimento')">+ Novo Procedimento</button>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="dentistas">
+    <h2 class="section-title">Cadastro de Dentistas</h2>
+    <table>
+        <thead>
+            <tr><th>Nome</th><th>CRO</th><th>Especialidade</th><th>Ação</th></tr>
+   
+    
+        </thead>
+        <tbody>
+       
+     <tr><td>Dra.
+    Ana Costa</td> <td>CRO/SP 12345</td><td>Clínica Geral</td><td><button>Editar</button><button id="remDentista1" class="hide-for-dentist hide-for-client" style="background:red; margin-left:5px;">Remover</button></td></tr>
+            <tr><td>Dr.
+Pedro Alves</td> <td>CRO/RJ 67890</td><td>Ortodontia</td><td><button>Editar</button><button id="remDentista2" class="hide-for-dentist hide-for-client" style="background:red; margin-left:5px;">Remover</button></td></tr>
+        </tbody>
+    </table>
+    <button>+ Novo Dentista</button>
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="estoque">
+    <h2 class="section-title">Gestão de Estoque</h2>
+    <table>
+        <thead>
+            <tr><th>Material</th><th>Quantidade Atual</th><th>Estoque Mínimo</th><th>Status</th><th>Ação</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Luva de Procedimento</td><td>50 
+caixas</td><td>60</td><td style="color:red; font-weight:bold;">Abaixo do Mínimo!</td>
+ 
+                <td><button class="hide-for-dentist">+ Add</button><button class="hide-for-dentist" style="margin-left:5px;">- Remove</button></td>
+            </tr>
+        
+        <tr><td>Resina Z350</td><td>15 unidades</td><td>10</td><td style="color:green;">OK</td>
+            <td><button class="hide-for-dentist">+ Add</button><button class="hide-for-dentist" style="margin-left:5px;">- Remove</button></td>
+        </tr>
+        </tbody>
+    </table>
+    <button onclick="showScreen('dashboard')">Voltar 
+ao Dashboard</button>
+</div>
+
+<div class="container hidden" id="suporte">
+    <h2 class="section-title">Suporte 
+    e Chamados</h2>
+    <p>Use esta área para criar um novo chamado de suporte.</p>
+    <button onclick="openSuporteForm()">+ Abrir Novo Chamado</button> <table>
+        <thead>
+            <tr><th>ID Chamado</th><th>Data Abertura</th><th>Prioridade</th><th>Descrição</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>#001</td><td>2025-10-28 10:00</td><td>Alta</td><td>Erro ao salvar Plano de Tratamento.</td><td>Em Atendimento</td></tr>
+   
+         </tbody>
+    </table>
+ 
+    <button onclick="showScreen('dashboard')">Voltar ao Dashboard</button>
+</div>
+
+<script>
+    let userRole = 
+null;
+    // Armazena o nível de acesso do usuário logado
+
+    // Mapeamento de telas para ícones e nomes
+    const screenMap = {
+        'agendamento': { icon: '🗓️', text: 'Agendamento' },
+        'historico': { icon: '🕰️', text: 'Meu Histórico' }, // Novo cartão para o histórico do cliente
+        'meusDados': { icon: '👤', text: 'Meus Dados' }, // NOVO cartão para Meus Dados
+        'pacientes': { icon: '🧑‍🦱', 
+text: 'Pacientes' },
+        'prontuario': { icon: '📋', text: 'Prontuário' },
+        'financeiro': 
+    { icon: '💲', text: 'Financeiro' },
+        'relatorios': { icon: '📊', text: 'Relatórios' },
+    
+        'procedimentos': { icon: '💎', text: 'Procedimentos' },
+        'dentistas': { icon: '👩‍⚕️', text: 'Dentistas' },
+        'estoque': { icon: '📦', text: 'Estoque' },
+      
+  'suporte': { icon: '🛠️', text: 'Suporte' } // Adicionar aba "suporte"
+    };
+// Definição das permissões de acesso por perfil (corrigidas)
+    const accessPermissions = {
+        // Administrativo: Acesso total + Meus Dados
+        'Administrativo': ['agendamento', 'pacientes', 'prontuario', 'financeiro', 'relatorios', 'procedimentos', 'dentistas', 'estoque', 'suporte', 'meusDados'],
+        // Dentista: remover financeiro, adicionar suporte, manter procedimentos + Meus Dados
+        'Dentista': ['agendamento', 'pacientes', 'prontuario', 'procedimentos', 'estoque', 'suporte', 'meusDados'], 
+        // Cliente: remover financeiro, adicionar historico e suporte + Meus Dados
+ 
+       'Cliente': ['agendamento', 'historico', 'prontuario', 
+    'suporte', 'meusDados'] 
+    };
+function login() {
+        const user = document.getElementById('user').value.toLowerCase();
+        const pass = document.getElementById('pass').value;
+// **Lógica de Autenticação Simulada**
+        if (pass === '123') {
+            if (user === 'admin@clinica.com') {
+                userRole = 'Administrativo';
+} else if (user === 'dentista@clinica.com') {
+                userRole = 'Dentista';
+} else if (user === 'joao@silva.com') {
+                userRole = 'Cliente';
+} else {
+                alert('Credenciais inválidas ou Usuário não cadastrado.');
+return;
+            }
+        } else {
+            alert('Senha incorreta.');
+return;
+        }
+
+        document.getElementById('loginScreen').classList.add('hidden');
+        renderDashboard();
+}
+
+    function logout() {
+        userRole = null;
+        showScreen('loginScreen');
+document.getElementById('user').value = '';
+        document.getElementById('pass').value = '';
+    }
+
+    // NOVA FUNÇÃO: Gera dinamicamente o dashboard com base na permissão
+    function renderDashboard() {
+        const dashboardGrid = document.querySelector('#dashboard .grid');
+dashboardGrid.innerHTML = ''; // Limpa os cartões existentes
+
+        const allowedScreens = accessPermissions[userRole] ||
+[];
+
+        allowedScreens.forEach(screen => {
+            const info = screenMap[screen];
+            if (info) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.setAttribute('onclick', `showScreen('${screen}')`);
+              
+
+    
+                card.innerHTML = `${info.icon} ${info.text}`;
+                dashboardGrid.appendChild(card);
+            }
+        });
+// Adiciona botão de Sair
+        const logoutCard = document.createElement('div');
+        logoutCard.className = 'card';
+logoutCard.style.cssText = 'background:#d9534f; color:white; font-weight:bold;';
+        logoutCard.setAttribute('onclick', `logout()`);
+        logoutCard.innerHTML = `🚪 Sair (${userRole})`;
+        dashboardGrid.appendChild(logoutCard);
+
+        document.getElementById('dashboard').classList.remove('hidden');
+// Aplica ajustes de interface/funcionalidade por perfil
+        applyRoleSpecificAdjustments();
+}
+
+    // NOVO: Função para aplicar ajustes de interface por perfil
+    function applyRoleSpecificAdjustments() {
+        // Ocultar botões de CRUD de Estoque para Dentista
+        const estoqueButtons = document.querySelectorAll('#estoque .hide-for-dentist');
+estoqueButtons.forEach(btn => {
+            if (userRole === 'Dentista') {
+                btn.style.display = 'none'; // Oculta o botão de Add/Remove Estoque para Dentista
+            } else {
+                btn.style.display = ''; 
+            }
+        });
+// Ocultar botão de Adicionar Procedimento no Prontuário para Cliente
+        const addProcButton = document.getElementById('addProcedimentoBtn');
+if (addProcButton) {
+            if (userRole === 'Cliente') {
+                addProcButton.style.display = 'none';
+// Oculta o botão de Add Procedimento para Cliente
+            } else {
+                addProcButton.style.display = '';
+}
+        }
+        
+        // Ocultar botão de Adicionar Paciente/Procedimento para Cliente
+        const addPacBtn = document.getElementById('addPacienteBtn');
+if (addPacBtn) {
+            if (userRole === 'Cliente') {
+                addPacBtn.style.display = 'none';
+} else {
+                addPacBtn.style.display = '';
+// Novo Paciente visível para Dentista/Admin
+            }
+        }
+
+        const addProcCadBtn = document.getElementById('addProcedimentoCadBtn');
+if (addProcCadBtn) {
+            if (userRole === 'Cliente') {
+                addProcCadBtn.style.display = 'none';
+} else {
+                addProcCadBtn.style.display = '';
+// Novo Procedimento visível para Dentista/Admin
+            }
+        }
+        
+        // Ocultar botão de Remover Dentista para Dentista e Cliente
+        const removeDentistaButtons = document.querySelectorAll('#dentistas .hide-for-dentist, #dentistas .hide-for-client');
+removeDentistaButtons.forEach(btn => {
+            if (userRole !== 'Administrativo') {
+                btn.style.display = 'none'; // Oculta o botão de Remover Dentista para Dentista/Cliente
+            } else {
+                btn.style.display = '';
+            }
+        });
+}
+
+    // NOVA FUNÇÃO: Simula o cadastro
+    function registerUser() {
+        const name = document.getElementById('regName').value;
+const email = document.getElementById('regEmail').value;
+        const pass = document.getElementById('regPass').value;
+        // Padrão Cliente, conforme anotações
+        const role = 'Cliente';
+if (name && email && pass) {
+            alert(`Cadastro de ${name} como ${role} enviado! Aguarde a aprovação da Clínica para Dentista/Administrativo. (Simulação)`);
+// Limpar campos
+            document.getElementById('regName').value = '';
+            document.getElementById('regEmail').value = '';
+document.getElementById('regPass').value = '';
+            
+            showScreen('loginScreen');
+        } else {
+            alert('Preencha todos os campos obrigatórios.');
+}
+    }
+    
+    // **NOVA FUNÇÃO**
+    function openSuporteForm() {
+        alert('Funcionalidade: Abrir formulário para detalhar o novo chamado.\nOpções de Suporte:\n1. Financeiro\n2. Atendimento\n3. Cadastro\n4. Outros');
+    }
+
+    function showScreen(screen) {
+        // Lista de TODAS as telas (agora mais completa e consistente)
+        const screens = [
+            'dashboard',
+            'loginScreen',
+            'cadastro', 
+            'agendamento',
+            
+'historico', 
+            'meusDados', // NOVO
+            'pacientes',
+            'prontuario',
+            'financeiro',
+            'relatorios',
+            'procedimentos',
+            'dentistas',
+            'estoque',
+ 
+           'suporte'
+           ];
+// Esconde todas as telas
+        screens.forEach(s => {
+            const element = document.getElementById(s);
+            if (element) {
+                element.classList.add('hidden');
+            }
+        });
+// Mostra a tela solicitada
+        const targetElement = document.getElementById(screen);
+if (targetElement) {
+            targetElement.classList.remove('hidden');
+// Aplica ajustes específicos (ocultar botões) ao mostrar telas que dependem do perfil
+            if (['prontuario', 'pacientes', 'estoque', 'procedimentos', 'dentistas', 'financeiro', 'relatorios'].includes(screen)) {
+                applyRoleSpecificAdjustments();
+}
+        }
+    }
+</script>
+</body>
+</html>
