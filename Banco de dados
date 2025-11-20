@@ -1,19 +1,19 @@
--- DDL CORRIGIDO COM ESTOQUE INCLUÍDO NO DROP TABLE INICIAL
+-- DDL COMPLETO E CORRIGIDO PARA O SISTEMA PROSPERITY
+-- Inclui a correção da tabela USUARIO (Status_Conta) e garante a ordem lógica das dependências.
 
--- A CLÁUSULA DROP TABLE IF EXISTS GARANTE QUE TODAS AS TABELAS SEJAM REMOVIDAS
--- ANTES DE SEREM RE-CRIADAS, EVITANDO O ERRO [42P07].
+-- DROP TABLE IF EXISTS GARANTE QUE TODAS AS TABELAS SEJAM REMOVIDAS ANTES DE SEREM RE-CRIADAS, EVITANDO ERROS.
 DROP TABLE IF EXISTS SUPORTE_CHAMADO, COMISSAO_DENTISTA, PAGAMENTO, CONTAS_PAGAR, CONTAS_RECEBER, CANC_REAGENDAMENTO, EVOLUCAO, ATENDIMENTO, AGENDA_DENTISTA, ITEM_PLANO, PLANO_TRATAMENTO, ODONTOGRAMA, ANAMNESE, PROCEDIMENTO, DENTISTA, PACIENTE, USUARIO, ESTOQUE CASCADE;
-
 
 -- MÓDULO I: CADASTRO BÁSICO E USUÁRIOS
 
--- Tabela de Usuários
+-- Tabela de Usuários (Inclui Status_Conta para aprovação de perfis)
 CREATE TABLE USUARIO (
     ID_Usuario SERIAL PRIMARY KEY,
     Email VARCHAR(100) UNIQUE NOT NULL,
     Senha VARCHAR(255) NOT NULL,
     Tipo VARCHAR(20) NOT NULL CHECK (Tipo IN ('Dentista', 'Recepcionista', 'Administrativo', 'Cliente')), 
-    Data_Cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    Data_Cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Status_Conta VARCHAR(20) NOT NULL DEFAULT 'Pendente' CHECK (Status_Conta IN ('Ativo', 'Inativo', 'Pendente'))
 );
 
 -- Tabela de Pacientes (Cliente)
@@ -48,7 +48,6 @@ CREATE TABLE PROCEDIMENTO (
     Codigo_TUSS VARCHAR(20)
 );
 
-
 -- MÓDULO II: CLÍNICO (PRONTUÁRIO)
 
 -- Tabela de Anamnese
@@ -73,7 +72,7 @@ CREATE TABLE ODONTOGRAMA (
     FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente)
 );
 
--- Tabela de Plano de Tratamento
+-- Tabela de Plano de Tratamento (Depende de PACIENTE e DENTISTA)
 CREATE TABLE PLANO_TRATAMENTO (
     ID_Plano SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
@@ -85,7 +84,7 @@ CREATE TABLE PLANO_TRATAMENTO (
     FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
 );
 
--- Tabela de Itens do Plano
+-- Tabela de Itens do Plano (Depende de PLANO_TRATAMENTO e PROCEDIMENTO)
 CREATE TABLE ITEM_PLANO (
     ID_Item SERIAL PRIMARY KEY,
     ID_Plano INT NOT NULL,
@@ -98,21 +97,9 @@ CREATE TABLE ITEM_PLANO (
     FOREIGN KEY (ID_Procedimento) REFERENCES PROCEDIMENTO(ID_Procedimento)
 );
 
--- Tabela de Evolução
-CREATE TABLE EVOLUCAO (
-    ID_Evolucao SERIAL PRIMARY KEY,
-    ID_Plano INT,
-    ID_Atendimento INT NOT NULL,
-    Data_Evolucao TIMESTAMP NOT NULL,
-    Descricao_Evolucao TEXT NOT NULL,
-    Procedimento_Realizado VARCHAR(100),
-    FOREIGN KEY (ID_Plano) REFERENCES PLANO_TRATAMENTO(ID_Plano)
-);
-
-
 -- MÓDULO III: AGENDAMENTO
 
--- Tabela de Agenda
+-- Tabela de Agenda (Depende de DENTISTA)
 CREATE TABLE AGENDA_DENTISTA (
     ID_Agenda SERIAL PRIMARY KEY,
     ID_Dentista INT NOT NULL,
@@ -124,7 +111,7 @@ CREATE TABLE AGENDA_DENTISTA (
     FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
 );
 
--- Tabela de Atendimentos
+-- Tabela de Atendimentos (A tabela 'relação' que estava faltando na execução)
 CREATE TABLE ATENDIMENTO (
     ID_Atendimento SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
@@ -136,12 +123,20 @@ CREATE TABLE ATENDIMENTO (
     FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
 );
 
--- Atualiza a chave estrangeira na tabela EVOLUCAO
-ALTER TABLE EVOLUCAO
-ADD CONSTRAINT FK_Evolucao_Atendimento
-FOREIGN KEY (ID_Atendimento) REFERENCES ATENDIMENTO(ID_Atendimento);
+-- Tabela de Evolução (Criada agora, com a FK inline para maior robustez)
+-- Nota: A FK ID_Atendimento foi movida para dentro do CREATE TABLE para evitar o erro 42P01.
+CREATE TABLE EVOLUCAO (
+    ID_Evolucao SERIAL PRIMARY KEY,
+    ID_Plano INT,
+    ID_Atendimento INT NOT NULL,
+    Data_Evolucao TIMESTAMP NOT NULL,
+    Descricao_Evolucao TEXT NOT NULL,
+    Procedimento_Realizado VARCHAR(100),
+    FOREIGN KEY (ID_Plano) REFERENCES PLANO_TRATAMENTO(ID_Plano),
+    FOREIGN KEY (ID_Atendimento) REFERENCES ATENDIMENTO(ID_Atendimento)
+);
 
--- Tabela de Cancelamento/Reagendamento
+-- Tabela de Cancelamento/Reagendamento (Depende de ATENDIMENTO)
 CREATE TABLE CANC_REAGENDAMENTO (
     ID_CANC_REAG SERIAL PRIMARY KEY,
     ID_Atendimento INT NOT NULL,
@@ -153,10 +148,9 @@ CREATE TABLE CANC_REAGENDAMENTO (
     FOREIGN KEY (ID_Novo_Atendimento) REFERENCES ATENDIMENTO(ID_Atendimento)
 );
 
-
 -- MÓDULO IV: GESTÃO E FINANCEIRO
 
--- Tabela de Contas a Receber
+-- Tabela de Contas a Receber (Depende de PLANO_TRATAMENTO)
 CREATE TABLE CONTAS_RECEBER (
     ID_Receber SERIAL PRIMARY KEY,
     ID_Plano INT NOT NULL,
@@ -179,7 +173,7 @@ CREATE TABLE CONTAS_PAGAR (
     Status VARCHAR(20) NOT NULL CHECK (Status IN ('Pendente', 'Pago', 'Atrasado'))
 );
 
--- Tabela de Pagamento de Clientes
+-- Tabela de Pagamento de Clientes (Depende de PACIENTE e CONTAS_RECEBER)
 CREATE TABLE PAGAMENTO (
     ID_Pagamento SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
@@ -191,7 +185,7 @@ CREATE TABLE PAGAMENTO (
     FOREIGN KEY (ID_Conta_Receber) REFERENCES CONTAS_RECEBER(ID_Receber)
 );
 
--- Tabela de Comissões de Dentistas
+-- Tabela de Comissões de Dentistas (Depende de PAGAMENTO e DENTISTA)
 CREATE TABLE COMISSAO_DENTISTA (
     ID_Comissao SERIAL PRIMARY KEY,
     ID_Pagamento INT NOT NULL,
@@ -213,7 +207,7 @@ CREATE TABLE ESTOQUE (
     Data_Ultima_Compra DATE
 );
 
--- Tabela de Suporte/Chamados
+-- Tabela de Suporte/Chamados (Depende de USUARIO)
 CREATE TABLE SUPORTE_CHAMADO (
     ID_Chamado SERIAL PRIMARY KEY,
     ID_Usuario INT NOT NULL,
