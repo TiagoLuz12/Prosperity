@@ -1,0 +1,239 @@
+-- DDL COMPLETO E CORRIGIDO PARA O SISTEMA PROSPERITY (POSTGRESQL)
+-- Inclui o DROP TABLE para garantir uma execução limpa antes de criar as novas tabelas.
+
+DROP TABLE IF EXISTS SUPORTE_CHAMADO, COMISSAO_DENTISTA, PAGAMENTO, CONTAS_PAGAR, CONTAS_RECEBER, CANC_REAGENDAMENTO, EVOLUCAO, REGISTRO_ESTOQUE, ATENDIMENTO, AGENDA_DENTISTA, ITEM_PLANO, PLANO_TRATAMENTO, ODONTOGRAMA, ANAMNESE, PROCEDIMENTO, DENTISTA, PACIENTE, USUARIO, ESTOQUE CASCADE;
+
+--------------------------------------------------------------------------------
+-- MÓDULO I: CADASTRO BÁSICO E USUÁRIOS
+--------------------------------------------------------------------------------
+
+-- Tabela de Usuários (Inclui Status_Conta para aprovação de perfis)
+CREATE TABLE USUARIO (
+    ID_Usuario SERIAL PRIMARY KEY,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Senha VARCHAR(255) NOT NULL,
+    Tipo VARCHAR(20) NOT NULL CHECK (Tipo IN ('Dentista', 'Recepcionista', 'Administrativo', 'Cliente')), 
+    Data_Cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Status_Conta VARCHAR(20) NOT NULL DEFAULT 'Pendente' CHECK (Status_Conta IN ('Ativo', 'Inativo', 'Pendente'))
+);
+
+-- Tabela de Pacientes (Cliente)
+CREATE TABLE PACIENTE (
+    ID_Paciente SERIAL PRIMARY KEY,
+    Nome VARCHAR(150) NOT NULL,
+    CPF VARCHAR(14) UNIQUE,
+    Telefone VARCHAR(15) NOT NULL,
+    Endereco VARCHAR(255),
+    Data_Nascimento DATE,
+    ID_Usuario INT,
+    FOREIGN KEY (ID_Usuario) REFERENCES USUARIO(ID_Usuario)
+);
+
+-- Tabela de Dentistas (Médico)
+CREATE TABLE DENTISTA (
+    ID_Dentista SERIAL PRIMARY KEY,
+    Nome VARCHAR(150) NOT NULL,
+    CRO VARCHAR(20) UNIQUE NOT NULL,
+    Especialidade VARCHAR(100),
+    Telefone VARCHAR(15),
+    ID_Usuario INT,
+    FOREIGN KEY (ID_Usuario) REFERENCES USUARIO(ID_Usuario)
+);
+
+-- Tabela de Procedimentos (Serviços Oferecidos)
+CREATE TABLE PROCEDIMENTO (
+    ID_Procedimento SERIAL PRIMARY KEY,
+    Nome_Procedimento VARCHAR(100) NOT NULL,
+    Descricao TEXT,
+    Valor_Particular NUMERIC(10, 2) NOT NULL,
+    Codigo_TUSS VARCHAR(20)
+);
+
+--------------------------------------------------------------------------------
+-- MÓDULO II: CLÍNICO (PRONTUÁRIO)
+--------------------------------------------------------------------------------
+
+-- Tabela de Anamnese
+CREATE TABLE ANAMNESE (
+    ID_Anamnese SERIAL PRIMARY KEY,
+    ID_Paciente INT NOT NULL,
+    Data_Registro DATE NOT NULL,
+    Historico_Medico TEXT,
+    Alergias TEXT,
+    Observacoes_Gerais TEXT,
+    FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente)
+);
+
+-- Tabela de Odontograma
+CREATE TABLE ODONTOGRAMA (
+    ID_Odontograma SERIAL PRIMARY KEY,
+    ID_Paciente INT NOT NULL,
+    Dente_Numero VARCHAR(5) NOT NULL,
+    Face_Dente VARCHAR(20),
+    Status_Dente VARCHAR(50) NOT NULL CHECK (Status_Dente IN ('Hígido', 'Cárie', 'Restauração', 'Extraído', 'Ausente', 'Prótese')),
+    Observacao TEXT,
+    FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente)
+);
+
+-- Tabela de Plano de Tratamento
+CREATE TABLE PLANO_TRATAMENTO (
+    ID_Plano SERIAL PRIMARY KEY,
+    ID_Paciente INT NOT NULL,
+    ID_Dentista INT NOT NULL,
+    Data_Criacao DATE NOT NULL,
+    Valor_Total_Proposto NUMERIC(10, 2),
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('Proposto', 'Aprovado', 'Em Andamento', 'Concluído', 'Cancelado')),
+    FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente),
+    FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
+);
+
+-- Tabela de Itens do Plano
+CREATE TABLE ITEM_PLANO (
+    ID_Item SERIAL PRIMARY KEY,
+    ID_Plano INT NOT NULL,
+    ID_Procedimento INT NOT NULL,
+    Dente_Numero VARCHAR(5),
+    Face_Dente VARCHAR(20),
+    Valor_Cobrado NUMERIC(10, 2) NOT NULL,
+    Status_Execucao VARCHAR(20) NOT NULL CHECK (Status_Execucao IN ('A Fazer', 'Feito', 'Não Realizado')),
+    FOREIGN KEY (ID_Plano) REFERENCES PLANO_TRATAMENTO(ID_Plano),
+    FOREIGN KEY (ID_Procedimento) REFERENCES PROCEDIMENTO(ID_Procedimento)
+);
+
+--------------------------------------------------------------------------------
+-- MÓDULO III: AGENDAMENTO
+--------------------------------------------------------------------------------
+
+-- Tabela de Agenda
+CREATE TABLE AGENDA_DENTISTA (
+    ID_Agenda SERIAL PRIMARY KEY,
+    ID_Dentista INT NOT NULL,
+    Data DATE NOT NULL,
+    Hora_Inicio TIME NOT NULL,
+    Hora_Fim TIME NOT NULL,
+    Status_Slot VARCHAR(20) NOT NULL CHECK (Status_Slot IN ('Disponível', 'Bloqueado')),
+    UNIQUE (ID_Dentista, Data, Hora_Inicio),
+    FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
+);
+
+-- Tabela de Atendimentos
+CREATE TABLE ATENDIMENTO (
+    ID_Atendimento SERIAL PRIMARY KEY,
+    ID_Paciente INT NOT NULL,
+    ID_Dentista INT NOT NULL,
+    Data_Hora_Inicio TIMESTAMP NOT NULL,
+    Duracao_Minutos INT,
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('Agendado', 'Confirmado', 'Realizado', 'Cancelado', 'Reagendado', 'Faltou')),
+    FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente),
+    FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
+);
+
+-- Tabela de Evolução (Aprimorada para histórico clínico)
+CREATE TABLE EVOLUCAO (
+    ID_Evolucao SERIAL PRIMARY KEY,
+    ID_Plano INT,
+    ID_Atendimento INT NOT NULL,
+    Data_Evolucao TIMESTAMP NOT NULL,
+    Descricao_Evolucao TEXT NOT NULL,
+    ID_Procedimento_Realizado INT, 
+    Dente_Local VARCHAR(20), -- Ex: 36 - Oclusal
+    FOREIGN KEY (ID_Plano) REFERENCES PLANO_TRATAMENTO(ID_Plano),
+    FOREIGN KEY (ID_Atendimento) REFERENCES ATENDIMENTO(ID_Atendimento),
+    FOREIGN KEY (ID_Procedimento_Realizado) REFERENCES PROCEDIMENTO(ID_Procedimento)
+);
+
+-- Tabela de Cancelamento/Reagendamento
+CREATE TABLE CANC_REAGENDAMENTO (
+    ID_CANC_REAG SERIAL PRIMARY KEY,
+    ID_Atendimento INT NOT NULL,
+    Tipo VARCHAR(20) NOT NULL CHECK (Tipo IN ('Cancelamento', 'Reagendamento')),
+    Motivo TEXT,
+    Data_Registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ID_Novo_Atendimento INT,
+    FOREIGN KEY (ID_Atendimento) REFERENCES ATENDIMENTO(ID_Atendimento),
+    FOREIGN KEY (ID_Novo_Atendimento) REFERENCES ATENDIMENTO(ID_Atendimento)
+);
+
+--------------------------------------------------------------------------------
+-- MÓDULO IV: GESTÃO E FINANCEIRO
+--------------------------------------------------------------------------------
+
+-- Tabela de Contas a Receber
+CREATE TABLE CONTAS_RECEBER (
+    ID_Receber SERIAL PRIMARY KEY,
+    ID_Plano INT NOT NULL,
+    Descricao VARCHAR(100),
+    Data_Vencimento DATE NOT NULL,
+    Valor_Parcela NUMERIC(10, 2) NOT NULL,
+    Data_Recebimento DATE,
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('Pendente', 'Pago', 'Atrasado', 'Cancelado')),
+    FOREIGN KEY (ID_Plano) REFERENCES PLANO_TRATAMENTO(ID_Plano)
+);
+
+-- Tabela de Contas a Pagar
+CREATE TABLE CONTAS_PAGAR (
+    ID_Pagar SERIAL PRIMARY KEY,
+    Descricao VARCHAR(100) NOT NULL,
+    Tipo VARCHAR(20) NOT NULL CHECK (Tipo IN ('Aluguel', 'Material', 'Salário', 'Outros')),
+    Data_Vencimento DATE NOT NULL,
+    Valor NUMERIC(10, 2) NOT NULL,
+    Data_Pagamento DATE,
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('Pendente', 'Pago', 'Atrasado'))
+);
+
+-- Tabela de Pagamento de Clientes
+CREATE TABLE PAGAMENTO (
+    ID_Pagamento SERIAL PRIMARY KEY,
+    ID_Paciente INT NOT NULL,
+    Data_Pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Valor NUMERIC(10, 2) NOT NULL,
+    Forma_Pagamento VARCHAR(30) NOT NULL CHECK (Forma_Pagamento IN ('Dinheiro', 'Cartão Débito', 'Cartão Crédito', 'Pix', 'Cheque')),
+    ID_Conta_Receber INT,
+    FOREIGN KEY (ID_Paciente) REFERENCES PACIENTE(ID_Paciente),
+    FOREIGN KEY (ID_Conta_Receber) REFERENCES CONTAS_RECEBER(ID_Receber)
+);
+
+-- Tabela de Comissões de Dentistas
+CREATE TABLE COMISSAO_DENTISTA (
+    ID_Comissao SERIAL PRIMARY KEY,
+    ID_Pagamento INT NOT NULL,
+    ID_Dentista INT NOT NULL,
+    Percentual NUMERIC(5, 2) NOT NULL,
+    Valor_Comissao NUMERIC(10, 2) NOT NULL,
+    Status_Pagamento VARCHAR(20) NOT NULL CHECK (Status_Pagamento IN ('Pendente', 'Pago')),
+    FOREIGN KEY (ID_Pagamento) REFERENCES PAGAMENTO(ID_Pagamento),
+    FOREIGN KEY (ID_Dentista) REFERENCES DENTISTA(ID_Dentista)
+);
+
+-- Tabela de Estoque
+CREATE TABLE ESTOQUE (
+    ID_Material SERIAL PRIMARY KEY,
+    Nome_Material VARCHAR(100) NOT NULL,
+    Quantidade INT NOT NULL DEFAULT 0,
+    Unidade VARCHAR(10) NOT NULL,
+    Estoque_Minimo INT,
+    Data_Ultima_Compra DATE
+);
+
+-- Tabela de Registro de Movimentação do Estoque (Para rastrear Add/Remove)
+CREATE TABLE REGISTRO_ESTOQUE (
+    ID_Registro SERIAL PRIMARY KEY,
+    ID_Material INT NOT NULL,
+    Tipo_Movimentacao VARCHAR(10) NOT NULL CHECK (Tipo_Movimentacao IN ('Entrada', 'Saída')), 
+    Quantidade_Movimentada INT NOT NULL,
+    Data_Registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ID_Usuario_Responsavel INT,
+    FOREIGN KEY (ID_Material) REFERENCES ESTOQUE(ID_Material),
+    FOREIGN KEY (ID_Usuario_Responsavel) REFERENCES USUARIO(ID_Usuario)
+);
+
+-- Tabela de Suporte/Chamados
+CREATE TABLE SUPORTE_CHAMADO (
+    ID_Chamado SERIAL PRIMARY KEY,
+    ID_Usuario INT NOT NULL,
+    Data_Abertura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Prioridade VARCHAR(10) NOT NULL CHECK (Prioridade IN ('Baixa', 'Média', 'Alta')),
+    Descricao TEXT NOT NULL,
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('Aberto', 'Em Atendimento', 'Fechado')),
+    FOREIGN KEY (ID_Usuario) REFERENCES USUARIO(ID_Usuario)
+);
