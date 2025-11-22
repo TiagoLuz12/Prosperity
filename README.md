@@ -4,9 +4,10 @@ Preparado para estar atendendo e trazendo o melhor para sua Clinica Odontologica
 Possibilitando melhor gestão e desenvolvimento.
 
 
-# ER Diagrama do banco de dados V4
+# ER Diagrama do banco de dados Prosperity
 
-<img width="1431" height="1267" alt="ER_Prosperity_V4-1" src="https://github.com/user-attachments/assets/0a1a6b1a-5863-4470-8ef4-838f2517f827" />
+<img width="1514" height="1459" alt="prosperity - public" src="https://github.com/user-attachments/assets/490fe38b-db59-483f-8c58-39ff1bd12840" />
+
 
 
 # Diagrama de atividades
