@@ -6,7 +6,8 @@ Possibilitando melhor gestão e desenvolvimento.
 
 # ER Diagrama do banco de dados Prosperity
 
-<img width="1514" height="1459" alt="prosperity - public" src="https://github.com/user-attachments/assets/490fe38b-db59-483f-8c58-39ff1bd12840" />
+<img width="1514" height="1459" alt="prosperity - public" src="https://github.com/user-attachments/assets/cb4495c6-fcac-4c62-aa6f-a2cf35ec2e5e" />
+
 
 
 
