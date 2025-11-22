@@ -259,3 +259,205 @@ JOIN ATENDIMENTO a ON e.ID_Atendimento = a.ID_Atendimento
 JOIN PACIENTE p ON a.ID_Paciente = p.ID_Paciente
 JOIN DENTISTA d ON a.ID_Dentista = d.ID_Dentista
 JOIN PROCEDIMENTO pr ON e.ID_Procedimento_Realizado = pr.ID_Procedimento;
+
+-- --------------------------------------------------------------------------------
+-- 3. CRIAÇÃO DE ÍNDICES PARA OTIMIZAÇÃO DE BUSCA
+-- --------------------------------------------------------------------------------
+
+-- Índice em PACIENTE por CPF (Comum para buscas rápidas)
+CREATE UNIQUE INDEX idx_paciente_cpf ON PACIENTE (CPF);
+
+-- Índice em ATENDIMENTO por Paciente e Data (Para agenda e prontuário)
+CREATE INDEX idx_atendimento_paciente_data ON ATENDIMENTO (ID_Paciente, Data_Hora_Inicio);
+
+-- Índice em AGENDA_DENTISTA por Dentista e Data (Para visualização de agenda)
+CREATE INDEX idx_agenda_dentista_data ON AGENDA_DENTISTA (ID_Dentista, Data, Hora_Inicio);
+
+-- Índice em CONTAS_RECEBER por Vencimento e Status (Para filtros financeiros)
+CREATE INDEX idx_contas_receber_vencimento_status ON CONTAS_RECEBER (Data_Vencimento, Status);
+
+-- Índice em ODONTOGRAMA por Paciente e Dente (Para acesso rápido ao histórico dentário)
+CREATE INDEX idx_odontograma_paciente_dente ON ODONTOGRAMA (ID_Paciente, Dente_Numero);
+
+-- --------------------------------------------------------------------------------
+-- 4. CONFIGURAÇÃO DE POLÍTICAS DE ACESSO (Usuários, Grupos e Privilégios)
+-- --------------------------------------------------------------------------------
+
+-- Criação de Grupos/Roles no PostgreSQL para gerenciar privilégios
+CREATE ROLE administrativo_group;
+CREATE ROLE recepcionista_group;
+CREATE ROLE dentista_group;
+CREATE ROLE cliente_group;
+
+-- 1. Privilégios para o grupo ADMINISTRATIVO (Acesso total)
+GRANT ALL ON ALL TABLES IN SCHEMA public TO administrativo_group;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO administrativo_group;
+
+-- 2. Privilégios para o grupo RECEPCIONISTA (Agendamento, Cadastro de Pacientes, Recebimento)
+GRANT SELECT, INSERT, UPDATE, DELETE ON PACIENTE, ATENDIMENTO, AGENDA_DENTISTA, CANC_REAGENDAMENTO TO recepcionista_group;
+GRANT SELECT ON PROCEDIMENTO, DENTISTA, USUARIO, PLANO_TRATAMENTO, CONTAS_RECEBER, PAGAMENTO, REL_CONTAS_RECEBER TO recepcionista_group;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO recepcionista_group;
+
+-- 3. Privilégios para o grupo DENTISTA (Prontuário, Evolução, Planos, Agenda - Não mexe em financeiro/estoque)
+GRANT SELECT, INSERT, UPDATE ON ANAMNESE, ODONTOGRAMA, PLANO_TRATAMENTO, ITEM_PLANO, EVOLUCAO TO dentista_group;
+GRANT SELECT, UPDATE ON AGENDA_DENTISTA, ATENDIMENTO TO dentista_group;
+GRANT SELECT ON PACIENTE, PROCEDIMENTO, REL_HISTORICO_CLINICO, REL_DESEMPENHO_DENTISTA TO dentista_group;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO dentista_group;
+
+-- 4. Privilégios para o grupo CLIENTE (Visualização limitada)
+GRANT SELECT ON PACIENTE TO cliente_group; -- Apenas o próprio paciente
+GRANT SELECT ON PLANO_TRATAMENTO, ITEM_PLANO TO cliente_group;
+GRANT SELECT ON ATENDIMENTO TO cliente_group;
+-- Nota: A segurança em nível de linha (Row Level Security - RLS) seria necessária para restringir a visualização apenas aos seus próprios dados.
+
+-- Exemplos de criação de usuários e atribuição a grupos
+CREATE USER user_admin WITH PASSWORD 'senha_admin';
+GRANT administrativo_group TO user_admin;
+
+CREATE USER user_recep WITH PASSWORD 'senha_recep';
+GRANT recepcionista_group TO user_recep;
+
+-- --------------------------------------------------------------------------------
+-- 5. IMPLEMENTAÇÃO DE TRIGGERS (Gatilhos)
+-- --------------------------------------------------------------------------------
+
+-- Gatilho 1: Manter a Quantidade de Estoque Consistente (Regra de Integridade)
+
+-- Função para atualizar a tabela ESTOQUE após INSERT na REGISTRO_ESTOQUE
+CREATE OR REPLACE FUNCTION atualiza_estoque_movimentacao()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.Tipo_Movimentacao = 'Entrada' THEN
+        UPDATE ESTOQUE
+        SET Quantidade = Quantidade + NEW.Quantidade_Movimentada
+        WHERE ID_Material = NEW.ID_Material;
+    ELSIF NEW.Tipo_Movimentacao = 'Saída' THEN
+        -- Verifica se há estoque suficiente antes de registrar a saída
+        IF (SELECT Quantidade FROM ESTOQUE WHERE ID_Material = NEW.ID_Material) < NEW.Quantidade_Movimentada THEN
+            RAISE EXCEPTION 'Erro: Estoque insuficiente para a saída de %', NEW.Quantidade_Movimentada;
+        END IF;
+        
+        UPDATE ESTOQUE
+        SET Quantidade = Quantidade - NEW.Quantidade_Movimentada
+        WHERE ID_Material = NEW.ID_Material;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Criação do Gatilho
+CREATE TRIGGER trg_atualiza_estoque
+AFTER INSERT ON REGISTRO_ESTOQUE
+FOR EACH ROW
+EXECUTE FUNCTION atualiza_estoque_movimentacao();
+
+
+-- Gatilho 2: Auditoria de Alterações Críticas (Exemplo: Alteração de Valor de Procedimento)
+
+-- Tabela de Auditoria (Deve ser criada separadamente)
+CREATE TABLE AUDITORIA_PROCEDIMENTOS (
+    ID_Auditoria SERIAL PRIMARY KEY,
+    ID_Procedimento INT NOT NULL,
+    Campo_Alterado VARCHAR(50) NOT NULL,
+    Valor_Antigo TEXT,
+    Valor_Novo TEXT,
+    Data_Hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Usuario_Modificador VARCHAR(50) DEFAULT CURRENT_USER
+);
+
+-- Função para registrar a auditoria
+CREATE OR REPLACE FUNCTION auditar_procedimento_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.Valor_Particular IS DISTINCT FROM NEW.Valor_Particular THEN
+        INSERT INTO AUDITORIA_PROCEDIMENTOS (ID_Procedimento, Campo_Alterado, Valor_Antigo, Valor_Novo)
+        VALUES (NEW.ID_Procedimento, 'Valor_Particular', OLD.Valor_Particular::TEXT, NEW.Valor_Particular::TEXT);
+    END IF;
+    -- Adicionar outros campos críticos aqui (ex: Nome_Procedimento)
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Criação do Gatilho
+CREATE TRIGGER trg_audita_procedimento
+AFTER UPDATE ON PROCEDIMENTO
+FOR EACH ROW
+EXECUTE FUNCTION auditar_procedimento_update();
+
+-- --------------------------------------------------------------------------------
+-- 6. IMPLEMENTAÇÃO DE PROCEDIMENTOS ARMAZENADOS (Stored Procedures)
+-- --------------------------------------------------------------------------------
+
+-- Procedure 1: Geração Automática das Contas a Receber (Regra de Negócio)
+-- Cria as parcelas no Contas_Receber baseado em um Plano de Tratamento APROVADO
+CREATE OR REPLACE PROCEDURE gerar_contas_receber(
+    plano_id INT,
+    num_parcelas INT,
+    data_primeiro_vencimento DATE
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    valor_total NUMERIC(10, 2);
+    valor_parcela NUMERIC(10, 2);
+    data_vencimento DATE := data_primeiro_vencimento;
+    i INT;
+BEGIN
+    -- 1. Recupera o valor total do plano
+    SELECT Valor_Total_Proposto INTO valor_total
+    FROM PLANO_TRATAMENTO
+    WHERE ID_Plano = plano_id AND Status = 'Aprovado';
+
+    IF valor_total IS NULL THEN
+        RAISE EXCEPTION 'Plano de Tratamento ID % não encontrado ou não está Aprovado.', plano_id;
+    END IF;
+
+    -- 2. Calcula o valor da parcela
+    valor_parcela := ROUND(valor_total / num_parcelas, 2);
+
+    -- 3. Cria as entradas em CONTAS_RECEBER
+    FOR i IN 1..num_parcelas LOOP
+        INSERT INTO CONTAS_RECEBER (ID_Plano, Descricao, Data_Vencimento, Valor_Parcela, Status)
+        VALUES (plano_id, 'Parcela ' || i || '/' || num_parcelas || ' do Plano ' || plano_id, data_vencimento, valor_parcela, 'Pendente');
+        
+        -- Avança a data de vencimento para o próximo mês
+        data_vencimento := (data_vencimento + INTERVAL '1 month')::DATE;
+    END LOOP;
+    
+    COMMIT;
+END;
+$$;
+
+
+-- Procedure 2: Cancelar Atendimento e Reagendar (Regra de Negócio/Processo)
+-- Altera o status do atendimento antigo e cria um registro de reagendamento.
+CREATE OR REPLACE PROCEDURE reagendar_atendimento(
+    atendimento_antigo_id INT,
+    novo_paciente_id INT,
+    novo_dentista_id INT,
+    nova_data_hora TIMESTAMP,
+    duracao_minutos INT,
+    motivo_reagendamento TEXT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    novo_atendimento_id INT;
+BEGIN
+    -- 1. Marca o atendimento original como Reagendado
+    UPDATE ATENDIMENTO
+    SET Status = 'Reagendado'
+    WHERE ID_Atendimento = atendimento_antigo_id;
+    
+    -- 2. Cria o novo registro de Atendimento (Novo Agendamento)
+    INSERT INTO ATENDIMENTO (ID_Paciente, ID_Dentista, Data_Hora_Inicio, Duracao_Minutos, Status)
+    VALUES (novo_paciente_id, novo_dentista_id, nova_data_hora, duracao_minutos, 'Agendado')
+    RETURNING ID_Atendimento INTO novo_atendimento_id;
+
+    -- 3. Registra a ação na tabela CANC_REAGENDAMENTO
+    INSERT INTO CANC_REAGENDAMENTO (ID_Atendimento, Tipo, Motivo, ID_Novo_Atendimento)
+    VALUES (atendimento_antigo_id, 'Reagendamento', motivo_reagendamento, novo_atendimento_id);
+    
+    COMMIT;
+END;
+$$;
