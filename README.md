@@ -13,9 +13,29 @@ Possibilitando melhor gestão e desenvolvimento.
 
 # Diagrama de atividades
 
-![Diagrama de atividades](https://github.com/user-attachments/assets/5ab008b6-6ba1-4d2f-bda2-8f4397f006a0)
+<img width="1021" height="817" alt="image" src="https://github.com/user-attachments/assets/7f6e3932-79f1-4b9d-bb19-fdb4fde4b9de" />
+
 
 
 # Diagrama Relacional
 
-<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/c9f19976-01a5-4a36-afd2-40f3951cefc7" />
+<img width="949" height="817" alt="image" src="https://github.com/user-attachments/assets/63c399de-1a65-4287-9907-15bd3992926f" />
+
+
+
+# Diagrama de Sequencia
+
+<img width="693" height="468" alt="image" src="https://github.com/user-attachments/assets/c921b0a2-c763-4929-a0e3-da7c00a14186" />
+
+
+
+# Diagrama de Estado
+
+<img width="1430" height="830" alt="image" src="https://github.com/user-attachments/assets/c20a1a5a-2d8f-48a1-940a-59675f4c75f2" />
+
+
+# Diagrama de Classe
+
+
+<img width="809" height="809" alt="image" src="https://github.com/user-attachments/assets/0ba18979-fadb-46fb-af44-632dda714bc4" />
+
