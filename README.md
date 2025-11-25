@@ -3,6 +3,13 @@ Um programa no qual você pode confiar, Criado e projetado para melhor lhe atend
 Preparado para estar atendendo e trazendo o melhor para sua Clinica Odontologica.
 Possibilitando melhor gestão e desenvolvimento.
 
+# Feramentas
+
+Visual Paradigm
+VsCode
+DBeaver
+Eclipse
+
 
 # ER Diagrama do banco de dados Prosperity
 
